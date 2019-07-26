@@ -9,6 +9,15 @@
 #include "common.h"
 #include "mp4-encoder.h"
 
+/**
+ * 流程：
+ * 1.初始化视频，音频的解码器，写入头协议
+ * 2.解码音频，解一帧写一帧音频frame
+ * 3.bitmap to yuv，循环写入视频帧
+ * 4.写入尾协议
+ * 5.释放资源
+ */
+
 JNIEXPORT jstring JNICALL
 Java_site_javen_ffmpeg_FFmpegEncoder_listAllCodec(JNIEnv *env,
                                                   jclass type) {
@@ -62,8 +71,12 @@ Java_site_javen_ffmpeg_FFmpegEncoder_init(JNIEnv *env,
                                           jint height) {
     const char *audiofile = (*env)->GetStringUTFChars(env, audiofile_, 0);
     const char *filename = (*env)->GetStringUTFChars(env, filename_, 0);
+
     int ret = init_encoder(filename, audiofile, width, height);
-    while (write_audio_frame() != -10000) {}
+    //一直写音频
+    while (write_audio_frame() != -10000) {
+
+    }
 
     (*env)->ReleaseStringUTFChars(env, audiofile_, audiofile);
     (*env)->ReleaseStringUTFChars(env, filename_, filename);

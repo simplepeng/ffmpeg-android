@@ -7,6 +7,7 @@
 #include "mp4-encoder.h"
 #include "common.h"
 #include "audio-decoder.h"
+#include <stdbool.h>
 
 OutputStream video_st = {0}, audio_st = {0};
 AVOutputFormat *fmt;
@@ -294,7 +295,7 @@ int init_encoder(const char *path, const char *audiopath, int _width, int _heigh
         add_stream(&audio_st, oc, &audio_codec, fmt->audio_codec);
         have_audio = 1;
     }
-    if (have_video) {
+    if (have_video) {//true
         open_video(oc, video_codec, &video_st, NULL);
     }
     if (have_audio) {
@@ -464,8 +465,10 @@ int flush_encoder() {
  * 'nb_channels' channels. */
 static AVFrame *get_audio_frame(OutputStream *ost) {
 
-    if (av_compare_ts(ost->next_pts, ost->enc->time_base,
-                      60, (AVRational) {1, 1}) >= 0)
+    if (av_compare_ts(ost->next_pts,
+                      ost->enc->time_base,
+                      60,
+                      (AVRational) {1, 1}) >= 0)
         return NULL;
     AVFrame *frame = ost->tmp_frame;
 //    int j, i, v;
