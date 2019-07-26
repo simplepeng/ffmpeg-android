@@ -83,5 +83,5 @@ int audio_decoder_read(AVFrame *frame) {
 }
 
 int audio_decoder_release() {
-
+    avcodec_free_context(&codec_context);
 }

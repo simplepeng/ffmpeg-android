@@ -458,6 +458,8 @@ int flush_encoder() {
 
     /* free the stream */
     avformat_free_context(oc);
+
+    audio_decoder_release();
 }
 
 
@@ -467,7 +469,7 @@ static AVFrame *get_audio_frame(OutputStream *ost) {
 
     if (av_compare_ts(ost->next_pts,
                       ost->enc->time_base,
-                      60,
+                      10,
                       (AVRational) {1, 1}) >= 0)
         return NULL;
     AVFrame *frame = ost->tmp_frame;
@@ -523,8 +525,10 @@ int write_audio_frame() {
 
         /* convert to destination format */
         ret = swr_convert(ost->swr_ctx,
-                          ost->frame->data, ost->frame->nb_samples,
-                          (const uint8_t **) frame->data, frame->nb_samples);
+                          ost->frame->data,
+                          ost->frame->nb_samples,
+                          (const uint8_t **) frame->data,
+                          frame->nb_samples);
         if (ret < 0) {
             return -1000;
         }
