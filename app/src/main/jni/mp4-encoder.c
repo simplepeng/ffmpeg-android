@@ -7,6 +7,7 @@
 #include "mp4-encoder.h"
 #include "common.h"
 #include "audio-decoder.h"
+#include <libyuv/convert_from_argb.h>
 #include <stdbool.h>
 
 OutputStream video_st = {0}, audio_st = {0};
@@ -362,10 +363,16 @@ AVFrame *get_video_frame(OutputStream *ost, uint8_t *data, AndroidBitmapInfo inf
                   0, c->height, ost->frame->data, ost->frame->linesize);
     } else {
 
+//        ARGBToI420(data, c->width * 4,
+//                   ost->frame->data[0], c->width,
+//                   ost->frame->data[2], (c->width + 1) / 2,
+//                   ost->frame->data[1], (c->width + 1) / 2,
+//                   c->width, c->height);
+
         ARGBToI420(data, c->width * 4,
-                   ost->frame->data[0], c->width,
-                   ost->frame->data[1], (c->width + 1) / 2,
-                   ost->frame->data[2], (c->width + 1) / 2,
+                   ost->frame->data[0], ost->frame->linesize[0],
+                   ost->frame->data[2], ost->frame->linesize[2],
+                   ost->frame->data[1], ost->frame->linesize[1],
                    c->width, c->height);
 
     }
@@ -469,7 +476,7 @@ static AVFrame *get_audio_frame(OutputStream *ost) {
 
     if (av_compare_ts(ost->next_pts,
                       ost->enc->time_base,
-                      10,
+                      19,
                       (AVRational) {1, 1}) >= 0)
         return NULL;
     AVFrame *frame = ost->tmp_frame;
